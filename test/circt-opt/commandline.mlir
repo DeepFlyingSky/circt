@@ -23,6 +23,7 @@
 // DIALECT-NEXT: moore
 // DIALECT-NEXT: msft
 // DIALECT-NEXT: scf
+// DIALECT-NEXT: sched
 // DIALECT-NEXT: seq
 // DIALECT-NEXT: staticlogic
 // DIALECT-NEXT: sv
