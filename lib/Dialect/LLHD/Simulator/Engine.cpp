@@ -198,7 +198,10 @@ int Engine::simulate(int n, uint64_t maxTime) {
         args.assign({&state, &inst.procState, &signalTable});
       }
       // Run the unit.
+      llvm::errs() << inst.toString() << "\n";
       (*inst.unitFPtr)(args.data());
+      llvm::errs() << " **** Exit inst.unitFPtr"
+                   << "\n";
     }
 
     // Clear wakeup queue.

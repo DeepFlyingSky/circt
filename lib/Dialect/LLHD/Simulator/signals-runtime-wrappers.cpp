@@ -24,6 +24,8 @@ using namespace circt::llhd::sim;
 
 int allocSignal(State *state, int index, char *owner, uint8_t *value,
                 int64_t size) {
+  llvm::errs() << " **** In Function allocSignal() ****"
+               << "\n";
   assert(state && "alloc_signal: state not found");
   std::string sOwner(owner);
 
@@ -32,29 +34,39 @@ int allocSignal(State *state, int index, char *owner, uint8_t *value,
 
 void addSigArrayElements(State *state, unsigned index, unsigned size,
                          unsigned numElements) {
+  llvm::errs() << " **** In Function addSigArrayElements() ****"
+               << "\n";
   for (size_t i = 0; i < numElements; ++i)
     state->addSignalElement(index, size * i, size);
 }
 
 void addSigStructElement(State *state, unsigned index, unsigned offset,
                          unsigned size) {
+  llvm::errs() << " **** In Function addSigStructElement() ****"
+               << "\n";
   state->addSignalElement(index, offset, size);
 }
 
 void allocProc(State *state, char *owner, ProcState *procState) {
   assert(state && "alloc_proc: state not found");
+  llvm::errs() << " **** In Function allocProc() ****"
+               << "\n";
   std::string sOwner(owner);
   state->addProcPtr(sOwner, procState);
 }
 
 void allocEntity(State *state, char *owner, uint8_t *entityState) {
   assert(state && "alloc_entity: state not found");
+  llvm::errs() << " **** In Function allocEntity() ****"
+               << "\n";
   auto it = state->getInstanceIterator(owner);
   (*it).entityState = std::unique_ptr<uint8_t>(entityState);
 }
 
 void driveSignal(State *state, SignalDetail *detail, uint8_t *value,
                  uint64_t width, int time, int delta, int eps) {
+  llvm::errs() << " **** In Function driveSignal() ****"
+               << "\n";
   assert(state && "drive_signal: state not found");
 
   auto globalIndex = detail->globalIndex;
@@ -70,6 +82,8 @@ void driveSignal(State *state, SignalDetail *detail, uint8_t *value,
 
 void llhdSuspend(State *state, ProcState *procState, int time, int delta,
                  int eps) {
+  llvm::errs() << " **** In Function llhdSuspend() ****"
+               << "\n";
   // Add a new scheduled wake up if a time is specified.
   if (time || delta || eps) {
     Time sTime(time, delta, eps);

@@ -274,6 +274,10 @@ struct ProcState {
 
 /// The simulator internal representation of an instance.
 struct Instance {
+  std::string toString() {
+    return " **** Dump Instance ( name = " + name + ", path =  " + path +
+           " , unit = " + unit + " )";
+  }
   Instance() = default;
 
   Instance(std::string name)

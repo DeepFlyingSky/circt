@@ -117,9 +117,17 @@ static int dumpLLVM(ModuleOp module, MLIRContext &context) {
     return 0;
   }
 
+  llvm::errs() << " **** DumpLLVMDialect ****"
+               << "\n";
+  module.dump();
+  llvm::errs() << "\n";
+
   // Translate the module, that contains the LLVM dialect, to LLVM IR.
   llvm::LLVMContext llvmContext;
   auto llvmModule = mlir::translateModuleToLLVMIR(module, llvmContext);
+  llvm::errs() << " **** DumpLLVM_raw ****"
+               << "\n";
+  llvm::errs() << *llvmModule << "\n";
   if (!llvmModule) {
     llvm::errs() << "Failed to emit LLVM IR\n";
     return -1;
@@ -133,6 +141,8 @@ static int dumpLLVM(ModuleOp module, MLIRContext &context) {
     return -1;
   }
 
+  llvm::errs() << " **** DumpLLVM_ ****"
+               << "\n";
   llvm::errs() << *llvmModule << "\n";
   return 0;
 }
@@ -183,6 +193,12 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  if (true) {
+    llvm::errs() << " **** DumpMLIR ****"
+                 << "\n";
+    module->dump();
+  }
+
   SmallVector<StringRef, 1> sharedLibPaths(sharedLibs.begin(),
                                            sharedLibs.end());
 
@@ -191,6 +207,9 @@ int main(int argc, char **argv) {
       makeOptimizingTransformer(optimizationLevel, 0, nullptr), root, traceMode,
       sharedLibPaths);
 
+  if (true) {
+    dumpLLVM(engine.getModule(), context);
+  }
   if (dumpLLVMDialect || dumpLLVMIR) {
     return dumpLLVM(engine.getModule(), context);
   }
@@ -199,6 +218,13 @@ int main(int argc, char **argv) {
     engine.dumpStateLayout();
     engine.dumpStateSignalTriggers();
     return 0;
+  }
+
+  if (true) {
+    llvm::errs() << " **** DumpLayout ****"
+                 << "\n";
+    engine.dumpStateLayout();
+    engine.dumpStateSignalTriggers();
   }
 
   engine.simulate(nSteps, maxTime);
