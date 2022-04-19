@@ -25,6 +25,8 @@ Trace::Trace(std::unique_ptr<State> const &state, llvm::raw_ostream &out,
     bool done = (mode != TraceMode::Full && mode != TraceMode::Merged &&
                  !sig.isOwner(root)) ||
                 (mode == TraceMode::NamedOnly && sig.isValidSigName());
+    if (true)
+      llvm::errs() << " **** !done  is " << std::to_string(!done) << "\n";
     isTraced.push_back(!done);
   }
 }
@@ -54,6 +56,11 @@ void Trace::pushChange(unsigned inst, unsigned sigIndex, int elem = -1) {
   // Check wheter we have an actual change from last value.
   auto lastValKey = std::make_pair(path, elem);
   if (valueDump != lastValue[lastValKey]) {
+    if (true)
+      llvm::errs() << " **** pushChange make_pair, path = " << path
+                   << " , elem = " << elem << " ,valueDump = " << valueDump
+                   << " , lastValue[lastValKey] = " << lastValue[lastValKey]
+                   << "\n";
     changes.push_back(std::make_pair(path, valueDump));
     lastValue[lastValKey] = valueDump;
   }
@@ -74,6 +81,9 @@ void Trace::pushAllChanges(unsigned inst, unsigned sigIndex) {
 
 void Trace::addChange(unsigned sigIndex) {
   currentTime = state->time;
+  if (true)
+    llvm::errs() << " **** addChange currentTime is " << currentTime.toString()
+                 << "\n";
   if (isTraced[sigIndex]) {
     if (mode == TraceMode::Full) {
       auto &sig = state->signals[sigIndex];

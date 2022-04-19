@@ -70,6 +70,10 @@ struct SignalDetail {
   uint64_t offset;
   uint64_t instIndex;
   uint64_t globalIndex;
+  std::string toString() {
+    return " SignalDetail ( instIndex = " + std::to_string(instIndex) +
+           " , globalIndex = " + std::to_string(globalIndex) + " ) ";
+  }
 };
 
 /// The simulator's internal representation of a signal.
@@ -204,6 +208,10 @@ private:
 struct Slot {
   /// Create a new empty slot.
   Slot(Time time) : time(time) {}
+
+  std::string toString() const {
+    return " **** struct Slot time is " + time.toString();
+  }
 
   /// Returns true if the slot's time is smaller than the compared slot's time.
   bool operator<(const Slot &rhs) const;

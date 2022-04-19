@@ -28,7 +28,7 @@ Engine::Engine(
     : out(out), root(root), traceMode(tm) {
   state = std::make_unique<State>();
   state->root = root + '.' + root;
-
+  // module->dump();
   buildLayout(module);
 
   auto rootEntity = module.lookupSymbol<EntityOp>(root);
@@ -73,7 +73,14 @@ int Engine::simulate(int n, uint64_t maxTime) {
 
   SmallVector<void *, 1> arg({&state});
   // Initialize tbe simulation state.
+  if (true)
+    llvm::errs() << " **** Start llhd_init function "
+                 << "\n";
   auto invocationResult = engine->invokePacked("llhd_init", arg);
+  if (true)
+    llvm::errs() << " **** End llhd_init function "
+                 << "\n";
+
   if (invocationResult) {
     llvm::errs() << "Failed invocation of llhd_init: " << invocationResult;
     return -1;
@@ -110,6 +117,15 @@ int Engine::simulate(int n, uint64_t maxTime) {
   while (state->queue.events > 0) {
     const auto &pop = state->queue.top();
 
+    if (true) {
+      llvm::errs() << " **** pop.slot is " << pop.toString() << "\n";
+      llvm::errs() << " **** pop.scheduled is ";
+
+      for (auto inst : pop.scheduled)
+        llvm::errs() << inst << " ";
+      llvm::errs() << "\n";
+    }
+
     // Interrupt the simulation if a stop condition is met.
     if ((n > 0 && cycle >= n) ||
         (maxTime > 0 && pop.time.getTime() > maxTime)) {
@@ -124,6 +140,8 @@ int Engine::simulate(int n, uint64_t maxTime) {
 
     // Process signal changes.
     size_t i = 0, e = pop.changesSize;
+    if (true)
+      llvm::errs() << " **** pop.changesSize = " << pop.changesSize << "\n";
     while (i < e) {
       const auto sigIndex = pop.changes[i].first;
       auto &curr = state->signals[sigIndex];
@@ -131,12 +149,21 @@ int Engine::simulate(int n, uint64_t maxTime) {
           curr.getSize() * 8,
           llvm::makeArrayRef(reinterpret_cast<uint64_t *>(curr.getValue()),
                              llvm::divideCeil(curr.getSize(), 8)));
+      if (true)
+        llvm::errs() << " **** buf = " << buff
+                     << " buffBitWidth = " << buff.getBitWidth() << "\n";
 
       // Apply the changes to the buffer until we reach the next signal.
       while (i < e && pop.changes[i].first == sigIndex) {
         const auto &change = pop.buffers[pop.changes[i].second];
         const auto offset = change.first;
         const auto &drive = change.second;
+        if (true) {
+          llvm::errs() << " **** buf = " << buff << " drive = " << drive
+                       << "\n";
+          llvm::errs() << " **** driveBitWidth = " << drive.getBitWidth()
+                       << " buffBitWidth = " << buff.getBitWidth() << "\n";
+        }
         if (drive.getBitWidth() < buff.getBitWidth())
           buff.insertBits(drive, offset);
         else
@@ -174,17 +201,43 @@ int Engine::simulate(int n, uint64_t maxTime) {
     }
 
     // Add scheduled process resumes to the wakeup queue.
+    if (true) {
+      llvm::errs() << " **** before wakeupQueue pop.scheduled is  ";
+
+      for (auto inst : pop.scheduled)
+        llvm::errs() << inst << " ";
+      llvm::errs() << "\n";
+    }
     for (auto inst : pop.scheduled) {
       if (state->time == state->instances[inst].expectedWakeup)
         wakeupQueue.push_back(inst);
     }
 
     state->queue.pop();
+    if (true) {
+      llvm::errs() << " **** wakeupQueue A is  ";
 
+      for (auto inst : wakeupQueue)
+        llvm::errs() << inst << " ";
+      llvm::errs() << "\n";
+    }
     std::sort(wakeupQueue.begin(), wakeupQueue.end());
+    if (true) {
+      llvm::errs() << " **** wakeupQueue B is  ";
+
+      for (auto inst : wakeupQueue)
+        llvm::errs() << inst << " ";
+      llvm::errs() << "\n";
+    }
     wakeupQueue.erase(std::unique(wakeupQueue.begin(), wakeupQueue.end()),
                       wakeupQueue.end());
+    if (true) {
+      llvm::errs() << " **** wakeupQueue C is  ";
 
+      for (auto inst : wakeupQueue)
+        llvm::errs() << inst << " ";
+      llvm::errs() << "\n";
+    }
     // Run the instances present in the wakeup queue.
     for (auto i : wakeupQueue) {
       auto &inst = state->instances[i];
@@ -198,10 +251,12 @@ int Engine::simulate(int n, uint64_t maxTime) {
         args.assign({&state, &inst.procState, &signalTable});
       }
       // Run the unit.
-      llvm::errs() << inst.toString() << "\n";
+      if (true)
+        llvm::errs() << inst.toString() << "\n";
       (*inst.unitFPtr)(args.data());
-      llvm::errs() << " **** Exit inst.unitFPtr"
-                   << "\n";
+      if (true)
+        llvm::errs() << " **** Exit inst.unitFPtr"
+                     << "\n";
     }
 
     // Clear wakeup queue.
@@ -241,7 +296,12 @@ void Engine::buildLayout(ModuleOp module) {
   // Add triggers to signals.
   for (size_t i = 0, e = state->instances.size(); i < e; ++i) {
     auto &inst = state->instances[i];
+    if (false) {
+      llvm::errs() << inst.toString() << "\n";
+    }
     for (auto trigger : inst.sensitivityList) {
+      if (false)
+        llvm::errs() << trigger.toString() << "\n";
       state->signals[trigger.globalIndex].pushInstanceIndex(i);
     }
   }
@@ -253,6 +313,10 @@ void Engine::walkEntity(EntityOp entity, Instance &child) {
 
     // Add a signal to the signal table.
     if (auto sig = dyn_cast<SigOp>(op)) {
+      if (false) {
+        llvm::errs() << " **** Signal (name = " << sig.name().str()
+                     << " owner = " << child.name << "\n";
+      }
       uint64_t index = state->addSignal(sig.name().str(), child.name);
       child.sensitivityList.push_back(
           SignalDetail({nullptr, 0, child.sensitivityList.size(), index}));
@@ -261,6 +325,8 @@ void Engine::walkEntity(EntityOp entity, Instance &child) {
     // Build (recursive) instance layout.
     if (auto inst = dyn_cast<InstOp>(op)) {
       // Skip self-recursion.
+      if (false)
+        llvm::errs() << " **** inst.callee() name is " << inst.callee() << "\n";
       if (inst.callee() == child.name)
         return;
       if (auto e =
@@ -269,6 +335,10 @@ void Engine::walkEntity(EntityOp entity, Instance &child) {
         newChild.unit = inst.callee().str();
         newChild.nArgs = inst.getNumOperands();
         newChild.path = child.path + "/" + inst.name().str();
+
+        if (false)
+          llvm::errs() << " **** newChild Instance is " << newChild.toString()
+                       << "\n";
 
         // Add instance arguments to sensitivity list. The first nArgs signals
         // in the sensitivity list represent the unit's arguments, while the

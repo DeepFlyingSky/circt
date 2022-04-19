@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (true) {
+  if (false) {
     llvm::errs() << " **** DumpMLIR ****"
                  << "\n";
     module->dump();
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
       makeOptimizingTransformer(optimizationLevel, 0, nullptr), root, traceMode,
       sharedLibPaths);
 
-  if (true) {
+  if (false) {
     dumpLLVM(engine.getModule(), context);
   }
   if (dumpLLVMDialect || dumpLLVMIR) {
@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (true) {
+  if (false) {
     llvm::errs() << " **** DumpLayout ****"
                  << "\n";
     engine.dumpStateLayout();
