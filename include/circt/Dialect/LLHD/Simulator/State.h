@@ -278,6 +278,13 @@ struct ProcState {
   int resume;
   bool *senses;
   uint8_t *resumeState;
+  std::string toString() {
+    return " ProcState( inst = " + std::to_string(inst) +
+           " , resume = " + std::to_string(resume) +
+           //  " senses = " + std::to_string(*senses) +
+           //  " resumeState = " + std::to_string(*resumeState) +
+           " ) ";
+  }
 };
 
 /// The simulator internal representation of an instance.

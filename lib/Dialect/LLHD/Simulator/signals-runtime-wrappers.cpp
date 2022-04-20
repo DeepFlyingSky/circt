@@ -51,6 +51,7 @@ void allocProc(State *state, char *owner, ProcState *procState) {
   assert(state && "alloc_proc: state not found");
   llvm::errs() << " **** In Function allocProc() ****"
                << "\n";
+  llvm::errs() << procState->toString() << "\n";
   std::string sOwner(owner);
   state->addProcPtr(sOwner, procState);
 }
@@ -84,6 +85,7 @@ void llhdSuspend(State *state, ProcState *procState, int time, int delta,
                  int eps) {
   llvm::errs() << " **** In Function llhdSuspend() ****"
                << "\n";
+  llvm::errs() << procState->toString() << "\n";
   // Add a new scheduled wake up if a time is specified.
   if (time || delta || eps) {
     Time sTime(time, delta, eps);
