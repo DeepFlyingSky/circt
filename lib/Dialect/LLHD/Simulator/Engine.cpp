@@ -28,7 +28,7 @@ Engine::Engine(
     : out(out), root(root), traceMode(tm) {
   state = std::make_unique<State>();
   state->root = root + '.' + root;
-  // module->dump();
+  module->dump();
   buildLayout(module);
 
   auto rootEntity = module.lookupSymbol<EntityOp>(root);

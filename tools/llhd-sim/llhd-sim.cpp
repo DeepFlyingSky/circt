@@ -141,7 +141,7 @@ static int dumpLLVM(ModuleOp module, MLIRContext &context) {
     return -1;
   }
 
-  llvm::errs() << " **** DumpLLVM_ ****"
+  llvm::errs() << " **** DumpLLVM_opt ****"
                << "\n";
   llvm::errs() << *llvmModule << "\n";
   return 0;
@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (false) {
+  if (true) {
     llvm::errs() << " **** DumpMLIR ****"
                  << "\n";
     module->dump();
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
       makeOptimizingTransformer(optimizationLevel, 0, nullptr), root, traceMode,
       sharedLibPaths);
 
-  if (false) {
+  if (true) {
     dumpLLVM(engine.getModule(), context);
   }
   if (dumpLLVMDialect || dumpLLVMIR) {
@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  if (false) {
+  if (true) {
     llvm::errs() << " **** DumpLayout ****"
                  << "\n";
     engine.dumpStateLayout();
