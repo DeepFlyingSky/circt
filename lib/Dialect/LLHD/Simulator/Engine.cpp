@@ -310,7 +310,13 @@ void Engine::buildLayout(ModuleOp module) {
 void Engine::walkEntity(EntityOp entity, Instance &child) {
   entity.walk([&](Operation *op) {
     assert(op);
-
+    if (true) {
+      llvm::errs() << " **** walk op is **** "
+                   << "\n";
+      op->dump();
+      llvm::errs() << " **** walk op done. **** "
+                   << "\n";
+    }
     // Add a signal to the signal table.
     if (auto sig = dyn_cast<SigOp>(op)) {
       if (false) {
